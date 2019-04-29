@@ -9,15 +9,19 @@ file = 'Dockerfile'
 with open(file) as f:
     line = f.readline()
     n_line = 1
-    var = ''
+    instruction = ''
     while line:
         if not util.isSplittedLine(line):
-            var = util.getInstruction(file, n_line)
+            instruction = util.getInstruction(file, n_line)
 
+        if instruction == 'COPY':
+            if util.checkAlreadyCopyDestinations(line):
+                print('ERROR: COPY destination already in another line.')
         print('{:03d} {:d} {:10s} | {}'.format(
             n_line,
             util.isSplittedLine(line),
-            var,
+            instruction,
             line), end='')
         line = f.readline()
         n_line += 1
+    print(util.instCopyList)
