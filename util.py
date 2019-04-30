@@ -19,3 +19,10 @@ def checkAlreadyCopyDestinations(line):
         else:
                 instCopyList.append(destination)
                 return False
+
+
+def checkRunAptGetInstall(line):
+        if ' -y --no-install-recommends' not in line:
+                return True
+        else:
+                return False
