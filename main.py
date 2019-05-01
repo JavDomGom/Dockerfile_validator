@@ -14,20 +14,20 @@ with open(file) as f:
         if not util.isSplittedLine(line):
             instruction = util.getInstruction(file, n_line)
 
-        print('{:03d} {:d} {:10s} | {}'.format(
+        print('{:03d} {:10s} | {}'.format(
             n_line,
-            util.isSplittedLine(line),
             instruction,
             line), end='')
 
         if instruction == 'COPY':
-            if util.checkAlreadyCopyDestinations(line):
-                print('ERROR: COPY destination already in another line.')
+            util.checkAlreadyCopyDestinations(line)
 
         if instruction == 'RUN':
-            if 'apt-get install' in line:
-                if util.checkRunAptGetInstall(line):
-                    print('ERROR: flags "-y --no-install-recommends" not found.')
+            if 'apt-get ' in line:
+                option = line.split('apt-get ')[1].split()[0]
+                isPackage = option == 'install'
+
+                util.findInRunAptGet(line, option)
 
         line = f.readline()
         n_line += 1
