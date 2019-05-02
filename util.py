@@ -35,6 +35,17 @@ def checkAlreadyCopyDestinations(line):
                 return False
 
 
+def isOnlyOnePacketInLine(line):
+        if isAndEOL(line):
+                maxLen = 3
+        elif isBackSlashEOL(line):
+                maxLen = 2
+
+        if len(line.split()) > maxLen:
+                print('ERROR: It\'s preferable to specify only ' +
+                      'one packet per line.')
+
+
 def findInRunAptGet(line, option):
 
         if option == 'update':
