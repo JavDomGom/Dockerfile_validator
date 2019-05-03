@@ -16,25 +16,33 @@ with open(file) as f:
         if not util.isSplittedLine(line):
             instruction = util.getInstruction(file, n_line)
 
-        if instruction == 'COPY':
-            util.checkAlreadyCopyDestinations(line)
-
-        print('{:03d} {:10s} | {}'.format(
+        print('{:03d} {:d} {:10s} | {}'.format(
             n_line,
+            semaphore,
             instruction,
             line), end='')
+
+        if instruction == 'COPY':
+            util.checkAlreadyCopyDestinations(line)
 
         if instruction == 'RUN':
             if semaphore:
                 util.isOnlyOnePacketInLine(line)
+
+                if util.isBackSlashEOL(line):
+                    if util.isAndEOL(line):
+                        semaphore = False
+                elif len(line.split()) == 1:
+                    semaphore = False
 
             if 'apt-get ' in line:
                 option = line.split('apt-get ')[1].split()[0]
                 if option == 'install':
                     semaphore = True
                 util.findInRunAptGet(line, option)
-            if util.isAndEOL(line) and util.isBackSlashEOL(line):
-                semaphore = False
+
+            if 'pip3 install' in line:
+                
 
         line = f.readline()
         n_line += 1
