@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 instCopyList = []
+labels = ['version',
+          'description',
+          'maintainer',
+          'stage']
 
 
 def isSplittedLine(line):
@@ -9,6 +13,12 @@ def isSplittedLine(line):
         :line: Dockerfile reading line.
     '''
     return line[0] == ' '
+
+
+def isOutOfInstruction(line):
+    if isSplittedLine(line) and len(line.split()) > 0:
+        print('ERROR: Line without parent instruction.')
+        return True
 
 
 def isBackSlashEOL(line):
@@ -74,5 +84,18 @@ def findInRunAptGet(line, option):
 
 def findInPipInstall(line):
     if '-Ur requirements.txt' not in line:
-        print('ERROR: "-y --no-install-recommends" not found.')
+        print('ERROR: "-Ur requirements.txt" not found.')
         return True
+
+
+def findInLabel(line):
+    for label in labels:
+        if label in line:
+            break
+        else:
+            print('ERROR: {}.'.format(label))
+            return True
+
+
+def printAlreadyRemoveInBlock(nLine):
+    print('ERROR: Command "rm" already used in line {}.'.format(nLine))

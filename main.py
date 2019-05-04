@@ -8,17 +8,23 @@ file = 'Dockerfile'
 
 with open(file) as f:
     line = f.readline()
-    n_line = 1
+    nLine = 1
     instruction = ''
-    semaphore = False
+    labelInstruction = False
+    semaphorePack = False
+    semaphoreRemove = False
+    nRemoveLine = 0
 
     while line:
         if not util.isSplittedLine(line):
-            instruction = util.getInstruction(file, n_line)
+            instruction = util.getInstruction(file, nLine)
 
-        print('{:03d} {:d} {:10s} | {}'.format(
-            n_line,
-            semaphore,
+        if instruction == '':
+            util.isOutOfInstruction(line)
+            semaphoreRemove = False
+
+        print('{:03d} {:10s} | {}'.format(
+            nLine,
             instruction,
             line), end='')
 
@@ -26,23 +32,38 @@ with open(file) as f:
             util.checkAlreadyCopyDestinations(line)
 
         if instruction == 'RUN':
-            if semaphore:
+            if semaphorePack:
                 util.isOnlyOnePacketInLine(line)
 
                 if util.isBackSlashEOL(line):
                     if util.isAndEOL(line):
-                        semaphore = False
+                        semaphorePack = False
                 elif len(line.split()) == 1:
-                    semaphore = False
+                    semaphorePack = False
+                    instruction = ''
 
             if 'apt-get ' in line:
                 option = line.split('apt-get ')[1].split()[0]
                 if option == 'install':
-                    semaphore = True
+                    semaphorePack = True
                 util.findInRunAptGet(line, option)
 
             if 'pip3 install' in line:
-                
+                util.findInPipInstall(line)
+
+            if 'rm -' in line:
+                if semaphoreRemove:
+                    util.printAlreadyRemoveInBlock(nRemoveLine)
+
+                nRemoveLine = nLine
+                semaphoreRemove = True
+
+        if instruction == 'LABEL':
+            labelInstruction = True
+            util.findInLabel(line)
+
+        if not labelInstruction:
+            pass
 
         line = f.readline()
-        n_line += 1
+        nLine += 1
