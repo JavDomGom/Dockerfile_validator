@@ -10,6 +10,7 @@ util.clearScreen()
 dockerfile      = sys.argv[1]
 nLine           = 1
 instruction     = ''
+userInstruction = False
 semaphorePack   = False
 semaphoreRemove = False
 nRemoveLine     = 0
@@ -66,8 +67,8 @@ with open(dockerfile) as f:
 
             if 'rm -' in line:
                 if semaphoreRemove:
-                    if util.printAlreadyRemoveInBlock(nRemoveLine):
-                        status = 'ERROR'
+                    util.printAlreadyRemoveInBlock(nRemoveLine)
+                    status = 'ERROR'
 
                 nRemoveLine = nLine
                 semaphoreRemove = True
@@ -75,12 +76,13 @@ with open(dockerfile) as f:
         if instruction == 'LABEL':
             labelOptions = util.getLabelOptions(line)
 
-        print('{:4d}  {} \u2551 {}'.format(
-            nLine,
-            util.getColoredStatus(status),
-            line), end='')
+        if instruction == 'USER':
+            userInstruction = True
+
+        util.printCheckedLine(nLine, status, line)
 
         line = f.readline()
         nLine += 1
 
     util.findInLabelOptions(labelOptions)
+    util.isUserInstruction(userInstruction)

@@ -61,7 +61,7 @@ def printError(msg):
         :msg: Error message.
     '''
 
-    print((' ' * 13) + '\u2551     ' + textRed(msg))
+    print('{}\u2551     {}'.format(' ' * 13, textRed(msg)))
 
 
 def checkArgs(arguments):
@@ -71,7 +71,7 @@ def checkArgs(arguments):
         :arguments: Arguments array.
     '''
 
-    if len(arguments) <= 1 or arguments[1] != 'Dockerfile':
+    if len(arguments) <= 1 or 'Dockerfile' not in arguments[1]:
         printError('Missing Dockerfile as argument.')
         sys.exit()
 
@@ -212,7 +212,7 @@ def findInPipInstall(line):
     '''
 
     if '-Ur requirements.txt' not in line:
-        printError('"-Ur requirements.txt" not found.')
+        printError('"-Ur requirements.txt" not found in pip3 statement.')
         return True
 
 
@@ -228,6 +228,17 @@ def getLabelOptions(line):
             labelOptions[option] = True
 
     return labelOptions
+
+
+def printAlreadyRemoveInBlock(nLine):
+    ''' This method prints an error when the "rm" program is executed more
+        than once in the block of the same instruction.
+
+    Attributes:
+        :nLine: Line number where the "rm" program has been found.
+    '''
+
+    printError('Command "rm" already used in line {}.'.format(nLine))
 
 
 def findInLabelOptions(labelOptions):
@@ -247,8 +258,9 @@ def findInLabelOptions(labelOptions):
             printError('Option "{}" missing in LABEL instruction.'.format(option))
             return True
 
+    return False
 
-def printAlreadyRemoveInBlock(nLine):
+def isUserInstruction(userInstruction):
     ''' This method prints an error when the "rm" program is executed more
         than once in the block of the same instruction.
 
@@ -256,5 +268,15 @@ def printAlreadyRemoveInBlock(nLine):
         :nLine: Line number where the "rm" program has been found.
     '''
 
-    printError('Command "rm" already used in line {}.'.format(nLine))
-    return True
+    if not userInstruction:
+        printError('Instruction USER not found in Dockerfile.')
+        return False
+    else:
+        return True
+
+
+def printCheckedLine(nLine, status, line):
+    print('{:4d}  {} \u2551 {}'.format(
+        nLine,
+        getColoredStatus(status),
+        line), end='')
